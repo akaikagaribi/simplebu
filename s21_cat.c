@@ -13,9 +13,9 @@ int main(int argc, char* argv[]) {
 
 s21_cat_flags parse_flags(int argc, char* argv[], int *error) {
     s21_cat_flags flags;
-    for (int i = 0; i < argc && *error == 0; i++) {
+    for (int i = 1; i < argc && *error == 0; i++) {
         char *cur_arg = argv[i];
-        if (cur_arg[0] == '-' && cur_arg[1] != '-') {  // Второе условие для будущей имплементации длинных флагов
+        if (cur_arg[0] == '-' && cur_arg[1] != '-') {
             for (int j = 1; cur_arg[j] != '\0' && *error == 0; j++) {
                 switch (cur_arg[j]) {
                 case 'A':
@@ -54,10 +54,52 @@ s21_cat_flags parse_flags(int argc, char* argv[], int *error) {
                     break;
                 default:
                     *error += 1;
-                    printf("%s: invalid option -- '%c'\n", APP_NAME, cur_arg[j]);
-                    printf("Try '%s --help' for more information.\n", APP_NAME);
+                    (void)printf("%s: invalid option -- '%c'\n", APP_NAME, cur_arg[j]);
+                    (void)printf("Try '%s --help' for more information.\n", APP_NAME);
                     break;
                 }
+            }
+        } else if (cur_arg[0] == '-' && cur_arg[1] == '-') {
+            if (strcmp(cur_arg, "--show-all") == 0) {
+                flags.show_nonprinting = true;
+                flags.show_ends = true;
+                flags.show_tabs = true;
+            } else if (strcmp(cur_arg, "--number-nonblank") == 0) {
+                flags.number_nonblank = true;
+            } else if (strcmp(cur_arg, "--show-ends") == 0) {
+                flags.show_ends = true;
+            } else if (strcmp(cur_arg, "--number") == 0) {
+                flags.number = true;
+            } else if (strcmp(cur_arg, "--squeeze-blank ") == 0) {
+                flags.squeeze_blank = true;
+            } else if (strcmp(cur_arg, "--show-tabs") == 0) {
+                flags.show_tabs = true;
+            } else if (strcmp(cur_arg, "--show-nonprinting") == 0) {
+                flags.show_nonprinting = true;
+            } else if (strcmp(cur_arg, "--help") == 0) {
+                i = __INT_MAX__ - 1;
+                flags.help = true;
+                flags.number = false;
+                flags.number_nonblank = false;
+                flags.show_ends = false;
+                flags.show_nonprinting = false;
+                flags.show_tabs = false;
+                flags.squeeze_blank = false;
+                flags.version = false;
+            } else if (strcmp(cur_arg, "--version") == 0) {
+                i = __INT_MAX__ - 1;
+                flags.help = false;
+                flags.number = false;
+                flags.number_nonblank = false;
+                flags.show_ends = false;
+                flags.show_nonprinting = false;
+                flags.show_tabs = false;
+                flags.squeeze_blank = false;
+                flags.version = true;
+            } else {
+                *error += 1;
+                (void)printf("%s: invalid option -- '%s'\n", APP_NAME, cur_arg);
+                (void)printf("Try '%s --help' for more information.\n", APP_NAME);
             }
         }
     }

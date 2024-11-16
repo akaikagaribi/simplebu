@@ -4,6 +4,7 @@
 #define APP_NAME "s21_cat"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdbool.h>
 
 typedef struct s21f {
