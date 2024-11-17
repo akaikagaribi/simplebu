@@ -30,7 +30,7 @@ void cat(char* filename, int* error) {
         *error += 1;
     }
     if (*error == 0) {
-        char ch = getc(file);
+        int ch = getc(file);
         while (ch >= 0) {
             // Тут будет дальнейшая логика
             (void)putc(ch, stdout);
