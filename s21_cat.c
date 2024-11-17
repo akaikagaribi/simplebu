@@ -29,21 +29,20 @@ void cat(char* filename, s21_cat_args args, int* error) {
         *error += 1;
     }
     if (*error == 0) {
-        int lineno = 1;
+        int lineno = 0;
+        int pch = -1;
         int ch = getc(file);
-        if (args.number) {
-            (void)printf("%6d  ", lineno);
-        }
         while (ch >= 0) {
             // Тут будет дальнейшая логика
-            // --number
-            (void)putc(ch, stdout);
-            if (ch == (int)'\n') {
-                lineno += 1;
-                if (args.number) {
-                    (void)printf("%6d  ", lineno);
+            // --number && --number-nonblank
+            if ((pch == (int)'\n' && ch != -1) || pch == -1) {
+                if (args.number || (args.number_nonblank && ch != (int)'\n')) {
+                    lineno += 1;
+                    (void)printf("%6d\t", lineno);
                 }
             }
+            (void)putc(ch, stdout);
+            pch = ch;
             ch = getc(file);
         }
     }
@@ -97,6 +96,7 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                         args.show_ends = true;
                         break;
                     case 'n':
+                        ensure_number_disabled = true;
                         args.number = true;
                         break;
                     case 's':
@@ -129,6 +129,7 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                 args.show_ends = true;
                 args.show_tabs = true;
             } else if (strcmp(cur_arg, "--number-nonblank") == 0) {
+                ensure_number_disabled = true;
                 args.number_nonblank = true;
             } else if (strcmp(cur_arg, "--show-ends") == 0) {
                 args.show_ends = true;
