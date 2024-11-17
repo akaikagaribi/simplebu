@@ -2,12 +2,13 @@
 #define S21_CAT_H_
 
 #define APP_NAME "s21_cat"
+#define APP_VERSION "0.1 pre alpha test"
 
+#include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
-#include <stdbool.h>
 
-typedef struct s21f {
+typedef struct s21ca {
     bool help;
     bool version;
     bool number;
@@ -16,8 +17,12 @@ typedef struct s21f {
     bool show_nonprinting;
     bool show_tabs;
     bool squeeze_blank;
-} s21_cat_flags;
+} s21_cat_args;
 
-s21_cat_flags parse_flags(int argc, char* argv[], int* error);
+void cat(char* filename, int* error);
+void print_help();
+void print_version();
+void parse_files(int argc, char* argv[], int* error);
+s21_cat_args parse_args(int argc, char* argv[], int* error);
 
 #endif
