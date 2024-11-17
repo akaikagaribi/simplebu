@@ -19,10 +19,10 @@ typedef struct s21ca {
     bool squeeze_blank;
 } s21_cat_args;
 
-void cat(char* filename, int* error);
+void cat(char* filename, s21_cat_args args, int* error);
 void print_help();
 void print_version();
-void parse_files(int argc, char* argv[], int* error);
+void parse_files(int argc, char* argv[], s21_cat_args args, int* error);
 s21_cat_args parse_args(int argc, char* argv[], int* error);
 
 #endif

@@ -11,29 +11,39 @@ int main(int argc, char* argv[]) {
         } else if (args.version) {
             (void)print_version();
         } else {
-            (void)parse_files(argc, argv, &error);
+            (void)parse_files(argc, argv, args, &error);
         }
     }
     return error;
 }
 
-void cat(char* filename, int* error) {
+void cat(char* filename, s21_cat_args args, int* error) {
     FILE* file;
     if (strcmp(filename, "-") == 0) {
         file = stdin;
-        // fscanf(file, )
     } else {
         file = fopen(filename, "r");
     }
     if (file == NULL) {
-        printf("%s: %s: No such file or directory\n", APP_NAME, filename);
+        (void)printf("%s: %s: No such file or directory\n", APP_NAME, filename);
         *error += 1;
     }
     if (*error == 0) {
+        int lineno = 1;
         int ch = getc(file);
+        if (args.number) {
+            (void)printf("%6d  ", lineno);
+        }
         while (ch >= 0) {
             // Тут будет дальнейшая логика
+            // --number
             (void)putc(ch, stdout);
+            if (ch == (int)'\n') {
+                lineno += 1;
+                if (args.number) {
+                    (void)printf("%6d  ", lineno);
+                }
+            }
             ch = getc(file);
         }
     }
@@ -50,15 +60,15 @@ void print_version() {
     (void)printf("%s (42 simplebashutils) %s\n", APP_NAME, APP_VERSION);
 }
 
-void parse_files(int argc, char* argv[], int* error) {
+void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
     for (int i = 1; i < argc && *error == 0; i++) {
         char* cur_arg = argv[i];
         if ((cur_arg[0] == '-' && cur_arg[1] == '\0') || cur_arg[0] != '-') {
-            (void)cat(cur_arg, error);
+            (void)cat(cur_arg, args, error);
         }
     }
     if (argc == 1) {
-        (void)cat("-", error);
+        (void)cat("-", args, error);
     }
 }
 
