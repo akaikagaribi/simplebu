@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     return error;
 }
 
-void cat(char* filename, s21_cat_args args, int* error) {
+void cat(char* filename, s21_cat_args args, bool* ended_with_empty, int* lineno, int* error) {
     FILE* file;
     if (strcmp(filename, "-") == 0) {
         file = stdin;
@@ -29,21 +29,37 @@ void cat(char* filename, s21_cat_args args, int* error) {
         *error += 1;
     }
     if (*error == 0) {
-        int lineno = 0;
+        int locallineno = 0;
         int pch = -1;
         int ch = getc(file);
+        bool is_empty = false;
         while (ch >= 0) {
+            is_empty = false;
             // Тут будет дальнейшая логика
             // --number && --number-nonblank
-            if ((pch == (int)'\n' && ch != -1) || pch == -1) {
-                if (args.number || (args.number_nonblank && ch != (int)'\n')) {
-                    lineno += 1;
-                    (void)printf("%6d\t", lineno);
+            if ((pch == -1 && ch == (int)'\n') || (pch == (int)'\n' && ch == (int)'\n') || (pch == (int)'\n' && ch == -1)) {
+                is_empty = true;
+            }
+            if (pch == (int)'\n' || (pch == -1 && *ended_with_empty)) {
+                locallineno += 1;
+                *lineno += 1;
+                if (args.number_nonblank && is_empty) {
+                    locallineno -= 1;
+                    *lineno -= 1;
                 }
+                if (args.number || (args.number_nonblank && !is_empty)) {
+                    (void)printf("%6d\t", *lineno);
+                }
+
             }
             (void)putc(ch, stdout);
             pch = ch;
             ch = getc(file);
+        }
+        if (pch == (int)'\n' && ch == -1) {
+            *ended_with_empty = true;
+        } else {
+            *ended_with_empty = false;
         }
     }
     if (*error == 0) {
@@ -60,14 +76,16 @@ void print_version() {
 }
 
 void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
+    int lineno = 0;
+    bool ended_with_empty = true;
     for (int i = 1; i < argc && *error == 0; i++) {
         char* cur_arg = argv[i];
         if ((cur_arg[0] == '-' && cur_arg[1] == '\0') || cur_arg[0] != '-') {
-            (void)cat(cur_arg, args, error);
+            (void)cat(cur_arg, args, &ended_with_empty, &lineno, error);
         }
     }
     if (argc == 1) {
-        (void)cat("-", args, error);
+        (void)cat("-", args, &ended_with_empty, &lineno, error);
     }
 }
 
