@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "TEST.C": "cpp",
+        "stdio.h": "c"
+    },
+    "C_Cpp.default.compilerPath": "/usr/bin/gcc"
+}

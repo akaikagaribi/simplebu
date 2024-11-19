@@ -64,10 +64,12 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
                     (void)printf("^%c", *ch + 64);
                 } else if (*ch > 127 && *ch < 160) {
                     (void)printf("M-^%c", *ch - 64);
-                } else if (*ch >= 160) {
+                } else if (*ch >= 160 && *ch < 255) {
                     (void)printf("M-%c", *ch - 128);
                 } else if (*ch == 127) {
                     (void)printf("^?");
+                } else if (*ch == 255) {
+                    (void)printf("M-^?");
                 } else {
                     npskip = false;
                 }
