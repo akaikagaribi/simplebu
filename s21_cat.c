@@ -17,7 +17,7 @@ int main(int argc, char* argv[]) {
     return error;
 }
 
-void cat(char* filename, s21_cat_args args, bool* ended_with_empty, int* lineno, int* error) {
+void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch, int* lineno, int* error) {
     FILE* file;
     if (strcmp(filename, "-") == 0) {
         file = stdin;
@@ -30,17 +30,17 @@ void cat(char* filename, s21_cat_args args, bool* ended_with_empty, int* lineno,
     }
     if (*error == 0) {
         int locallineno = 0;
-        int pch = -1;
-        int ch = getc(file);
+        *ch = getc(file);
         bool is_empty = false;
-        while (ch >= 0) {
+        while (*ch >= 0) {
             is_empty = false;
             // Тут будет дальнейшая логика
+            bool skip = (args.squeeze_blank && ((*ppch == (int)'\n' || *ppch == -1) && (*pch == (int)'\n')) && *ch == (int)'\n');
             // --number && --number-nonblank
-            if ((pch == -1 && ch == (int)'\n') || (pch == (int)'\n' && ch == (int)'\n') || (pch == (int)'\n' && ch == -1)) {
+            if ((*pch == -1 && *ch == (int)'\n') || (*pch == (int)'\n' && *ch == (int)'\n') || (*pch == (int)'\n' && *ch == -1)) {
                 is_empty = true;
             }
-            if (pch == (int)'\n' || (pch == -1 && *ended_with_empty)) {
+            if ((*pch == (int)'\n' || *pch == -1) && !skip) {
                 locallineno += 1;
                 *lineno += 1;
                 if (args.number_nonblank && is_empty) {
@@ -52,15 +52,46 @@ void cat(char* filename, s21_cat_args args, bool* ended_with_empty, int* lineno,
                 }
 
             }
-            (void)putc(ch, stdout);
-            pch = ch;
-            ch = getc(file);
+            // --show-nonprinting
+            if (args.show_nonprinting) {
+                bool npskip = true;
+                if (*ch < 32 && *ch != 9 && *ch != 10) {
+                    (void)printf("^%c", *ch + 64);
+                } else if (*ch > 127 && *ch < 160) {
+                    (void)printf("M-^%c", *ch - 64);
+                } else if (*ch >= 160) {
+                    (void)printf("M-%c", *ch - 128);
+                } else if (*ch == 127) {
+                    (void)printf("^?");
+                } else {
+                    npskip = false;
+                }
+                if (!skip) {
+                    skip = npskip;
+                }
+            }
+            // --show-ends
+            if (args.show_ends && *ch == (int)'\n' && !skip) {
+                (void)putc('$', stdout);
+            }
+            // --show-tabs
+            if (args.show_tabs && *ch == (int)'\t') {
+                (void)printf("^I");
+                skip = true;
+            }
+            // --squeeze-blank
+            if (!skip) {
+                (void)putc(*ch, stdout);
+            }
+            *ppch = *pch;
+            *pch = *ch;
+            *ch = getc(file);
         }
-        if (pch == (int)'\n' && ch == -1) {
-            *ended_with_empty = true;
-        } else {
-            *ended_with_empty = false;
-        }
+        // if (pch == (int)'\n' && ch == -1) {
+        //     *ended_with_empty = true;
+        // } else {
+        //     *ended_with_empty = false;
+        // }
     }
     if (*error == 0) {
         (void)fclose(file);
@@ -77,15 +108,17 @@ void print_version() {
 
 void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
     int lineno = 0;
-    bool ended_with_empty = true;
+    int ppch = -1;
+    int pch = -1;
+    int ch = -1;
     for (int i = 1; i < argc && *error == 0; i++) {
         char* cur_arg = argv[i];
         if ((cur_arg[0] == '-' && cur_arg[1] == '\0') || cur_arg[0] != '-') {
-            (void)cat(cur_arg, args, &ended_with_empty, &lineno, error);
+            (void)cat(cur_arg, args, &ppch, &pch, &ch, &lineno, error);
         }
     }
     if (argc == 1) {
-        (void)cat("-", args, &ended_with_empty, &lineno, error);
+        (void)cat("-", args, &ppch, &pch, &ch, &lineno, error);
     }
 }
 
@@ -103,6 +136,7 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                         args.show_tabs = true;
                         break;
                     case 'b':
+                        ensure_number_disabled = true;
                         args.number_nonblank = true;
                         break;
                     case 'e':
@@ -114,7 +148,6 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                         args.show_ends = true;
                         break;
                     case 'n':
-                        ensure_number_disabled = true;
                         args.number = true;
                         break;
                     case 's':
@@ -153,7 +186,7 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                 args.show_ends = true;
             } else if (strcmp(cur_arg, "--number") == 0) {
                 args.number = true;
-            } else if (strcmp(cur_arg, "--squeeze-blank ") == 0) {
+            } else if (strcmp(cur_arg, "--squeeze-blank") == 0) {
                 args.squeeze_blank = true;
             } else if (strcmp(cur_arg, "--show-tabs") == 0) {
                 args.show_tabs = true;
