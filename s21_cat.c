@@ -17,7 +17,8 @@ int main(int argc, char* argv[]) {
     return error;
 }
 
-void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch, int* lineno, int* error) {
+void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
+         int* lineno, int* error) {
     FILE* file;
     if (strcmp(filename, "-") == 0) {
         file = stdin;
@@ -35,9 +36,14 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch, int* l
         while (*ch >= 0) {
             is_empty = false;
             // Тут будет дальнейшая логика
-            bool skip = (args.squeeze_blank && ((*ppch == (int)'\n' || *ppch == -1) && (*pch == (int)'\n')) && *ch == (int)'\n');
+            bool skip =
+                (args.squeeze_blank &&
+                 ((*ppch == (int)'\n' || *ppch == -1) && (*pch == (int)'\n')) &&
+                 *ch == (int)'\n');
             // --number && --number-nonblank
-            if ((*pch == -1 && *ch == (int)'\n') || (*pch == (int)'\n' && *ch == (int)'\n') || (*pch == (int)'\n' && *ch == -1)) {
+            if ((*pch == -1 && *ch == (int)'\n') ||
+                (*pch == (int)'\n' && *ch == (int)'\n') ||
+                (*pch == (int)'\n' && *ch == -1)) {
                 is_empty = true;
             }
             if ((*pch == (int)'\n' || *pch == -1) && !skip) {
@@ -50,7 +56,6 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch, int* l
                 if (args.number || (args.number_nonblank && !is_empty)) {
                     (void)printf("%6d\t", *lineno);
                 }
-
             }
             // --show-nonprinting
             if (args.show_nonprinting) {
