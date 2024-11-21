@@ -12,7 +12,7 @@ for ((a=0;a<7;a++)); do
     for files in "${filesarr[@]}"
     do
         # echo "$files"
-        mine="$(./a.out $files -$args)"
+        mine="$(./s21_cat $files -$args)"
         they="$(cat $files -$args)"
         if diff <(echo "$mine") <(echo "$they") &> /dev/null
         then
@@ -32,7 +32,7 @@ for ((a=1;a<7;a++)); do
         for files in "${filesarr[@]}"
         do
             # echo "$files"
-            mine="$(./a.out $files -$args)"
+            mine="$(./s21_cat $files -$args)"
             they="$(cat $files -$args)"
             if diff <(echo "$mine") <(echo "$they") &> /dev/null
             then
@@ -54,7 +54,7 @@ for ((a=1;a<7;a++)); do
             for files in "${filesarr[@]}"
             do
                 # echo "$files"
-                mine="$(./a.out $files -$args)"
+                mine="$(./s21_cat $files -$args)"
                 they="$(cat $files -$args)"
                 if diff <(echo "$mine") <(echo "$they") &> /dev/null
                 then
@@ -78,7 +78,7 @@ for ((a=1;a<7;a++)); do
                 for files in "${filesarr[@]}"
                 do
                     # echo "$files"
-                    mine="$(./a.out $files -$args)"
+                    mine="$(./s21_cat $files -$args)"
                     they="$(cat $files -$args)"
                     if diff <(echo "$mine") <(echo "$they") &> /dev/null
                     then
@@ -104,7 +104,7 @@ for ((a=1;a<7;a++)); do
                     for files in "${filesarr[@]}"
                     do
                         # echo "$files"
-                        mine="$(./a.out $files -$args)"
+                        mine="$(./s21_cat $files -$args)"
                         they="$(cat $files -$args)"
                         if diff <(echo "$mine") <(echo "$they") &> /dev/null
                         then
@@ -132,7 +132,7 @@ for ((a=0;a<7;a++)); do
                         for files in "${filesarr[@]}"
                         do
                             # echo "$files"
-                            mine="$(./a.out $files -$args)"
+                            mine="$(./s21_cat $files -$args)"
                             they="$(cat $files -$args)"
                             if diff <(echo "$mine") <(echo "$they") &> /dev/null
                             then

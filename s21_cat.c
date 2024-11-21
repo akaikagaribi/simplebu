@@ -27,9 +27,11 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
     }
     if (file == NULL) {
         (void)printf("%s: %s: No such file or directory\n", APP_NAME, filename);
-        *error += 1;
+        *ppch = (int)'y';
+        *pch = (int)'\n';
+        *ch = -1;
     }
-    if (*error == 0) {
+    if (*error == 0 && file != NULL) {
         int locallineno = 0;
         *ch = getc(file);
         bool is_empty = false;
@@ -53,7 +55,7 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
                     locallineno -= 1;
                     *lineno -= 1;
                 }
-                if (args.number || (args.number_nonblank && !is_empty)) {
+                if ((args.number && !args.number_nonblank) || (args.number_nonblank && !is_empty)) {
                     (void)printf("%6d\t", *lineno);
                 }
             }
@@ -94,13 +96,8 @@ void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
             *pch = *ch;
             *ch = getc(file);
         }
-        // if (pch == (int)'\n' && ch == -1) {
-        //     *ended_with_empty = true;
-        // } else {
-        //     *ended_with_empty = false;
-        // }
     }
-    if (*error == 0) {
+    if (*error == 0 && file != NULL) {
         (void)fclose(file);
     }
 }
@@ -131,7 +128,6 @@ void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
 
 s21_cat_args parse_args(int argc, char* argv[], int* error) {
     s21_cat_args args = {};
-    bool ensure_number_disabled = false;
     for (int i = 1; i < argc && *error == 0; i++) {
         char* cur_arg = argv[i];
         if (cur_arg[0] == '-' && cur_arg[1] != '-') {
@@ -143,11 +139,9 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                         args.show_tabs = true;
                         break;
                     case 'b':
-                        ensure_number_disabled = true;
                         args.number_nonblank = true;
                         break;
                     case 'e':
-                        ensure_number_disabled = true;
                         args.show_nonprinting = true;
                         args.show_ends = true;
                         break;
@@ -187,7 +181,6 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                 args.show_ends = true;
                 args.show_tabs = true;
             } else if (strcmp(cur_arg, "--number-nonblank") == 0) {
-                ensure_number_disabled = true;
                 args.number_nonblank = true;
             } else if (strcmp(cur_arg, "--show-ends") == 0) {
                 args.show_ends = true;
@@ -199,26 +192,16 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                 args.show_tabs = true;
             } else if (strcmp(cur_arg, "--show-nonprinting") == 0) {
                 args.show_nonprinting = true;
-            } else if (strcmp(cur_arg, "--help") == 0) {
-                i = __INT_MAX__ - 1;
-                args.help = true;
+            } else if (strcmp(cur_arg, "--version") == 0 || strcmp(cur_arg, "--help") == 0) {
+                i = argc;
+                args.help = strcmp(cur_arg, "--help") == 0 ? true : false;;
                 args.number = false;
                 args.number_nonblank = false;
                 args.show_ends = false;
                 args.show_nonprinting = false;
                 args.show_tabs = false;
                 args.squeeze_blank = false;
-                args.version = false;
-            } else if (strcmp(cur_arg, "--version") == 0) {
-                i = __INT_MAX__ - 1;
-                args.help = false;
-                args.number = false;
-                args.number_nonblank = false;
-                args.show_ends = false;
-                args.show_nonprinting = false;
-                args.show_tabs = false;
-                args.squeeze_blank = false;
-                args.version = true;
+                args.version = strcmp(cur_arg, "--version") == 0 ? true : false;
             } else {
                 *error += 1;
                 (void)printf("%s: invalid option -- '%s'\n", APP_NAME, cur_arg);
@@ -226,9 +209,6 @@ s21_cat_args parse_args(int argc, char* argv[], int* error) {
                              APP_NAME);
             }
         }
-    }
-    if (ensure_number_disabled) {
-        args.number = false;
     }
     return args;
 }
