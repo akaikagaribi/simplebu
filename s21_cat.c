@@ -111,6 +111,7 @@ void print_version() {
 }
 
 void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
+    int fc = 0;
     int lineno = 0;
     int ppch = -1;
     int pch = -1;
@@ -119,9 +120,10 @@ void parse_files(int argc, char* argv[], s21_cat_args args, int* error) {
         char* cur_arg = argv[i];
         if ((cur_arg[0] == '-' && cur_arg[1] == '\0') || cur_arg[0] != '-') {
             (void)cat(cur_arg, args, &ppch, &pch, &ch, &lineno, error);
+            fc++;
         }
     }
-    if (argc == 1) {
+    if (argc == 1 || fc == 0) {
         (void)cat("-", args, &ppch, &pch, &ch, &lineno, error);
     }
 }
