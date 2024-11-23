@@ -3,31 +3,33 @@
 
 #define APP_NAME "s21_grep"
 #define APP_VERSION "0.1 pre alpha test"
+#define LINE_SIZE 4096
 
-#include <getopt.h>
-#include <iso646.h>
 #include <regex.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-typedef struct s21ca {
+typedef struct s21ga {
     bool help;
     bool version;
+    bool case_insensetive;
+    bool invert;
+    bool only_count;
+    bool only_filenames;
     bool number;
-    bool number_nonblank;
-    bool show_ends;
-    bool show_nonprinting;
-    bool show_tabs;
-    bool squeeze_blank;
-} s21_cat_args;
+    bool no_filenames;
+    bool supress_errors;
+    bool only_matches;
+    char filenames[LINE_SIZE];
+    char regex[LINE_SIZE];
+} s21_grep_args;
 
-void cat(char* filename, s21_cat_args args, int* ppch, int* pch, int* ch,
-         int* lineno, int* error);
 void print_help();
 void print_version();
-void parse_files(int argc, char* argv[], s21_cat_args args, int* error);
-s21_cat_args parse_args(int argc, char* argv[], int* error);
+int add_str_to_str(char* first, char* second, bool is_file);
+int asts_from_file(char* string, char* filename);
+void parse_args(int argc, char* argv[], s21_grep_args* args, int* error);
 
 #endif
