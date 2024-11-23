@@ -98,7 +98,8 @@ void parse_args(int argc, char* argv[], s21_grep_args* args, int* error) {
         *error += 1;
     }
     if (*error == 0 && argc > 1) {
-        int es = 0;
+        int ec = 0;
+        int fc = 0;
         for (int i = 1; i < argc && *error == 0; i++) {
             if (argv[i][0] == '-') {
                 if (argv[i][1] == 'e') {
@@ -108,7 +109,7 @@ void parse_args(int argc, char* argv[], s21_grep_args* args, int* error) {
                     } else {
                         *error = add_str_to_str(args->regex, argv[i] + 2, false);
                     }
-                    es++;
+                    ec++;
                 } else if (argv[i][1] == 'f') {
                     if (argv[i][2] == '\0') {
                         *error = asts_from_file(args->regex, argv[i + 1]);
@@ -147,16 +148,21 @@ void parse_args(int argc, char* argv[], s21_grep_args* args, int* error) {
         }
         for (int i = 1; i < argc && *error == 0; i++) {
             if (argv[i][0] != '-' && strcmp(argv[i - 1], "-e") != 0 && strcmp(argv[i - 1], "-f") != 0) {
-                if (es == 0) {
+                if (ec == 0) {
                     *error = add_str_to_str(args->regex, argv[i], false);
-                    es++;
+                    ec++;
                 } else {
                     *error = add_str_to_str(args->filenames, argv[i], true);
+                    fc++;
                 }
             }
         }
         if (strcmp(args->filenames, "") == 0) {
             (void)strncpy(args->filenames, "-", 2);
+            fc++;
+        }
+        if (fc < 2) {
+            args->no_filenames = true;
         }
     }
 }
