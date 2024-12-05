@@ -88,7 +88,8 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
                             if (args.number) {
                                 (void)printf("%d:", lineno);
                             }
-                            (void)printf("%.*s\n", len, linetoregex + pmatch[0].rm_so);
+                            (void)printf("%.*s\n", len,
+                                         linetoregex + pmatch[0].rm_so);
                             linetoregex += pmatch[0].rm_eo;
                             reti = regexec(&regex, linetoregex, 1, pmatch, 0);
                         }
@@ -112,14 +113,15 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
                 (void)printf("%s\n", filename);
             }
         } else if (args.only_count) {
-            if (!args.no_filenames)  {
+            if (!args.no_filenames) {
                 (void)printf("%s:", filename);
             }
             (void)printf("%d\n", matches);
         }
     } else {
         if (!args.supress_errors) {
-            (void)printf("%s: %s: No such file or directory\n", APP_NAME, filename);
+            (void)printf("%s: %s: No such file or directory\n", APP_NAME,
+                         filename);
         }
     }
     if (*error == 0 && file != NULL) {
@@ -154,7 +156,8 @@ int add_str_to_str(char* first, char* second, bool is_file) {
         if (strcmp(first, "") == 0) {
             (void)strncat(first, second, limit);
         } else {
-            is_file ? (void)strncat(first, "|", 3) : (void)strncat(first, "\\|", 3);
+            is_file ? (void)strncat(first, "|", 3)
+                    : (void)strncat(first, "\\|", 3);
             (void)strncat(first, second, limit - 1);
         }
     }
@@ -193,10 +196,12 @@ void parse_args(int argc, char* argv[], s21_grep_args* args, int* error) {
             if (argv[i][0] == '-') {
                 if (argv[i][1] == 'e') {
                     if (argv[i][2] == '\0') {
-                        *error = add_str_to_str(args->regex, argv[i + 1], false);
+                        *error =
+                            add_str_to_str(args->regex, argv[i + 1], false);
                         i++;
                     } else {
-                        *error = add_str_to_str(args->regex, argv[i] + 2, false);
+                        *error =
+                            add_str_to_str(args->regex, argv[i] + 2, false);
                     }
                     ec++;
                 } else if (argv[i][1] == 'f') {
@@ -208,46 +213,53 @@ void parse_args(int argc, char* argv[], s21_grep_args* args, int* error) {
                     }
                     ec++;
                 } else if (argv[i][1] == '-') {
-                    if (strcmp(argv[i], "--help") == 0 || strcmp(argv[i], "--version") == 0) {
-                        args->help = strcmp(argv[i], "--help") == 0 ? true : false;
-                        args->version = strcmp(argv[i], "--version") == 0 ? true : false;
+                    if (strcmp(argv[i], "--help") == 0 ||
+                        strcmp(argv[i], "--version") == 0) {
+                        args->help =
+                            strcmp(argv[i], "--help") == 0 ? true : false;
+                        args->version =
+                            strcmp(argv[i], "--version") == 0 ? true : false;
                         i = argc;
                     } else {
                         *error += 1;
-                        (void)printf("%s: invalid option -- '%s'\n", APP_NAME, argv[i]);
-                        (void)printf("Try '%s --help' for more information.\n", APP_NAME);
+                        (void)printf("%s: invalid option -- '%s'\n", APP_NAME,
+                                     argv[i]);
+                        (void)printf("Try '%s --help' for more information.\n",
+                                     APP_NAME);
                     }
                 } else {
                     for (int j = 1; argv[i][j] != '\0' && *error == 0; j++) {
-                        if (argv[i][j] == 'i') { // DONE
+                        if (argv[i][j] == 'i') {  // DONE
                             args->case_insensetive = true;
-                        } else if (argv[i][j] == 'v') { // DONE
+                        } else if (argv[i][j] == 'v') {  // DONE
                             args->invert = true;
-                        } else if (argv[i][j] == 'l') { // DONE
+                        } else if (argv[i][j] == 'l') {  // DONE
                             args->only_filenames = true;
-                        } else if (argv[i][j] == 'c') { // DONE
+                        } else if (argv[i][j] == 'c') {  // DONE
                             args->only_count = true;
-                        } else if (argv[i][j] == 'n') { // DONE
+                        } else if (argv[i][j] == 'n') {  // DONE
                             args->number = true;
-                        } else if (argv[i][j] == 'h') { // DONE
+                        } else if (argv[i][j] == 'h') {  // DONE
                             args->no_filenames = true;
-                        } else if (argv[i][j] == 's') { // DONE
+                        } else if (argv[i][j] == 's') {  // DONE
                             args->supress_errors = true;
-                        } else if (argv[i][j] == 'o') {
+                        } else if (argv[i][j] == 'o') {  // DONE
                             args->only_matches = true;
                         } else {
                             *error += 1;
-                            (void)printf("%s: invalid option -- '%c'\n", APP_NAME,
-                                        argv[i][j]);
-                            (void)printf("Try '%s --help' for more information.\n",
-                                        APP_NAME);
+                            (void)printf("%s: invalid option -- '%c'\n",
+                                         APP_NAME, argv[i][j]);
+                            (void)printf(
+                                "Try '%s --help' for more information.\n",
+                                APP_NAME);
                         }
                     }
                 }
             }
         }
         for (int i = 1; i < argc && *error == 0; i++) {
-            if (argv[i][0] != '-' && strcmp(argv[i - 1], "-e") != 0 && strcmp(argv[i - 1], "-f") != 0) {
+            if (argv[i][0] != '-' && strcmp(argv[i - 1], "-e") != 0 &&
+                strcmp(argv[i - 1], "-f") != 0) {
                 if (ec == 0) {
                     *error = add_str_to_str(args->regex, argv[i], false);
                     ec++;
@@ -279,14 +291,20 @@ void print_args(s21_grep_args args) {
     (void)printf("{\n");
     (void)printf("    \"help\": %s,\n", args.help ? "true" : "false");
     (void)printf("    \"version\": %s,\n", args.version ? "true" : "false");
-    (void)printf("    \"case_insensetive\": %s,\n", args.case_insensetive ? "true" : "false");
+    (void)printf("    \"case_insensetive\": %s,\n",
+                 args.case_insensetive ? "true" : "false");
     (void)printf("    \"invert\": %s,\n", args.invert ? "true" : "false");
-    (void)printf("    \"only_count\": %s,\n", args.only_count ? "true" : "false");
-    (void)printf("    \"only_filenames\": %s,\n", args.only_filenames ? "true" : "false");
+    (void)printf("    \"only_count\": %s,\n",
+                 args.only_count ? "true" : "false");
+    (void)printf("    \"only_filenames\": %s,\n",
+                 args.only_filenames ? "true" : "false");
     (void)printf("    \"number\": %s,\n", args.number ? "true" : "false");
-    (void)printf("    \"no_filenames\": %s,\n", args.no_filenames ? "true" : "false");
-    (void)printf("    \"supress_errors\": %s,\n", args.supress_errors ? "true" : "false");
-    (void)printf("    \"only_matches\": %s,\n", args.only_matches ? "true" : "false");
+    (void)printf("    \"no_filenames\": %s,\n",
+                 args.no_filenames ? "true" : "false");
+    (void)printf("    \"supress_errors\": %s,\n",
+                 args.supress_errors ? "true" : "false");
+    (void)printf("    \"only_matches\": %s,\n",
+                 args.only_matches ? "true" : "false");
     (void)printf("    \"filenames\": \"%s\",\n", args.filenames);
     (void)printf("    \"regex\": \"%s\",\n", args.regex);
     (void)printf("}\n");
