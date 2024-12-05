@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 pass=0
 fail=0
 

@@ -6,6 +6,7 @@ int main(int argc, char* argv[]) {
     int error = 0;
     s21_grep_args args = {};
     (void)parse_args(argc, argv, &args, &error);
+    // (void)print_args(args);
     if (error == 0) {
         if (args.help) {
             (void)print_help();
@@ -44,7 +45,7 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
         int matches = 0;
         char line[LINE_SIZE] = {};
         char* linetoregex = line;
-        (void)get_line(file, line);
+        char lc = get_line(file, line, true);
         while (line[0] != 0 && line[0] != -1) {
             lineno += 1;
             regmatch_t pmatch[1];
@@ -52,7 +53,7 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
             if ((!args.invert && reti == 0) || (args.invert && reti != 0)) {
                 if (!args.only_filenames && !args.only_count) {
                     if (args.only_matches) {
-                        for (int i = 0; reti == 0; i++) {
+                        while (reti == 0) {
                             regoff_t len = pmatch[0].rm_eo - pmatch[0].rm_so;
                             if (!args.no_filenames) {
                                 (void)printf("%s:", filename);
@@ -72,13 +73,17 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
                         if (args.number) {
                             (void)printf("%d:", lineno);
                         }
-                        (void)printf("%s\n", line);
+                        (void)printf("%s", line);
+                        if (lc != '\n') {
+                            (void)printf("\n");
+                        }
                     }
                 } else {
                     matches += 1;
                 }
             }
-            (void)get_line(file, line);
+            lc = get_line(file, line, true);
+            linetoregex = line;
         }
         if (args.only_filenames) {
             if (matches > 0) {
@@ -101,12 +106,16 @@ void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error) {
     }
 }
 
-char get_line(FILE* file, char* linebuf) {
+char get_line(FILE* file, char* linebuf, bool keep_newline) {
     char ch = getc(file);
     int i = 0;
     while (i < LINE_SIZE && ch != 10 && ch != -1) {
         linebuf[i] = ch;
         ch = getc(file);
+        i++;
+    }
+    if (keep_newline && ch == 10) {
+        linebuf[i] = ch;
         i++;
     }
     if (i == 0 && ch == -1) {
@@ -144,12 +153,12 @@ int asts_from_file(char* string, char* filename) {
         err += 1;
     } else {
         char rline[LINE_SIZE] = {};
-        (void)get_line(regexfile, rline);
+        (void)get_line(regexfile, rline, false);
         for (int j = 0; rline[0] != -1 && err == 0; j++) {
             if (rline[0] != 0 && rline[0] != -1) {
                 err = add_str_to_str(string, rline, false);
             }
-            (void)get_line(regexfile, rline);
+            (void)get_line(regexfile, rline, false);
         }
         (void)fclose(regexfile);
     }

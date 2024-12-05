@@ -1,0 +1,3 @@
+vga
+3d
+Intel
