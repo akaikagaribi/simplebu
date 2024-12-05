@@ -26,10 +26,13 @@ typedef struct s21ga {
     char regex[LINE_SIZE];
 } s21_grep_args;
 
-void print_help();
-void print_version();
+void parse_files(s21_grep_args args, int* error);
+void grep_file(char* filename, regex_t regex, s21_grep_args args, int* error);
+char get_line(FILE* file, char* linebuf);
 int add_str_to_str(char* first, char* second, bool is_file);
 int asts_from_file(char* string, char* filename);
 void parse_args(int argc, char* argv[], s21_grep_args* args, int* error);
+void print_help();
+void print_version();
 
 #endif
