@@ -6,7 +6,6 @@ int main(int argc, char* argv[]) {
     int error = 0;
     s21_grep_args args = {};
     (void)parse_args(argc, argv, &args, &error);
-    // (void)print_args(args);
     if (error == 0) {
         if (args.help) {
             (void)print_help();
@@ -16,33 +15,6 @@ int main(int argc, char* argv[]) {
             (void)parse_files(args, &error);
         }
     }
-    return error;
-    regex_t regex;
-    int reti;
-    reti = regcomp(&regex, argv[1], 0);
-    FILE* file = NULL;
-    if (argc > 2) {
-        file = fopen(argv[2], "r");
-    } else {
-        file = stdin;
-    }
-    char lspci[LINE_SIZE] = {};
-    int lineno = 0;
-    (void)get_line(file, lspci);
-    for (int i = 0; lspci[0] != -1; i++) {
-        lineno++;
-        if (lspci[0] != 0 && lspci[0] != -1) {
-            reti = regexec(&regex, lspci, 0, NULL, 0);
-            if (!reti) {
-                // -n
-                // (void)printf("%d:%s\n", lineno, lspci);
-                (void)printf("%s\n", lspci);
-            }
-        }
-        (void)get_line(file, lspci);
-    }
-    regfree(&regex);
-    (void)fclose(file);
     return error;
 }
 
